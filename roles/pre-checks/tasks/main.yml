@@ -1,0 +1,12 @@
+---
+# tasks file for pre-checks
+- name: Load File -> Azure CLI Query File
+  include_tasks: 01_construct_queries.yml
+- name: Load File -> Check Resource Group
+  include_tasks: 02_check_rg_exist.yml
+- name: Load File -> Check Virtual Netowork
+  include_tasks: 03_check_vnet_exist.yml
+- name: Load File -> Check Subnet
+  include_tasks: 04_check_subnet_exist.yml
+- name: Load File -> Check Load Balancer
+  include_tasks: 05_check_lb_name_exist.yml

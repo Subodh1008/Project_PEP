@@ -1,0 +1,25 @@
+---
+   - name: Create and Configure backend pool
+     block:
+     - name: Add IP's to backend address pool
+       shell: "az network lb address-pool address add --resource-group {{ rg_name }}
+                                                      --lb-name {{ lb_name }}
+                                                      --pool-name {{ bep_name }}
+                                                      --name {{ item.backendAddr }}
+                                                      --vnet {{ vnet_name }}
+                                                      --ip-address {{ item.IP }}"
+       register: create_bep_status
+       with_items:
+         - { backendAddr : "MyAddress1", IP : "10.0.0.4" }
+         - { backendAddr : "MyAddress2", IP : "10.0.0.5" }
+
+     - name: Check the status of backend pool
+       debug:
+         msg: "backend pool created and added IP's to them successfully"
+       when: create_bep_status.results[0].rc == 0 and create_bep_status.results[1].rc == 0
+
+     rescue:
+     - fail: 
+        msg: "Error occured while creating and configuring loadb balancer backend pool"
+
+

@@ -1,0 +1,23 @@
+---
+   - name: Create azure internal load balancer
+     block:
+     - name: Create and configure load balancer
+       shell: " az network lb create --name {{ lb_name }}
+                                     --resource-group {{ rg_name }}
+                                     --backend-pool-name {{ bep_name }}
+                                     --frontend-ip-name {{ default_fip_name }}
+                                     --sku {{ sku_value }}
+                                     --subnet {{ subnet_name }}  
+                                     --vnet-name {{ vnet_name }}"
+       register: create_lb_status
+
+     - name: Check the status of Load Balancer creation
+       debug:
+         msg: "Azure internal load balancer created successfully"
+       when: create_lb_status.rc == 0
+     
+     rescue:
+     - fail: 
+        msg: "Error occured while creating and configuring azure internal load balancer"
+
+

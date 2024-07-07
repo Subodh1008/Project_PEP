@@ -1,0 +1,21 @@
+---
+- name: Check Subnet name exist
+  block:
+  - name: Get load balancer name
+    shell: "if {{ fetch_lb_info }} >> /dev/null; then echo 'Exist'; else echo 'Not-Exist'; fi;"
+    register: get_lb_name
+    when: "'Exist' == get_rg_name.stdout and 'Exist' == get_vnet_name.stdout"
+
+  - name: Print Load Balancer exist message
+    debug:
+      msg: "The Load balancer: {{ lb_name }} already exist under Resource Group: {{ rg_name }}, VNet/Subnet: {{ vnet_name }}/{{subnet_name}} so it will be updatd"
+    when: "'Exist' == get_lb_name.stdout"
+
+  - name: Print Load Balancer not exist message
+    debug:
+      msg: "The Load balancer: {{ lb_name }} not found, so new load balancer will be created under Resource Group: {{ rg_name }}, VNet/Subnet: {{ vnet_name }}/{{subnet_name}}"
+    when: "'Not-Exist' == get_lb_name.stdout"
+ 
+  rescue:
+  - fail:
+     msg: "Error occured while executing the Azure CLI command"

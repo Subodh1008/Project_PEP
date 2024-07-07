@@ -1,0 +1,17 @@
+---
+- name: Create Azure Storage Account using Azure CLI
+  hosts: localhost
+  tasks:
+  - name: Create storage account
+    command: >
+        az storage account create
+        --name mystorage2288
+        --resource-group storage-rg
+        --location eastus
+        --sku Standard_LRS
+        --kind StorageV2
+    register: sa_create_output
+
+  - name: Print
+    debug: "{{ sa_create_output }}"
+

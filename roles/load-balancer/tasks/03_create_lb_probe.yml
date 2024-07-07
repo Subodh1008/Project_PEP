@@ -1,0 +1,22 @@
+---
+   - name: Create and Configure health probe
+     block:
+     - name: Create health probe
+       shell: "az network lb probe create --lb-name {{ lb_name }}
+                                          --name {{ probe_name }}
+                                          --port {{ probe_port }}
+                                          --protocol {{ protocol }}
+                                          --resource-group {{ rg_name }}
+                                          --interval {{ interval_value }}"
+       register: create_hp_status
+
+     - name: Check the status of Health Probe creation
+       debug:
+         msg: "Health probe created successfully"
+       when: create_hp_status.rc == 0
+
+     rescue:
+     - fail: 
+        msg: "Error occured while creating and configuring health probe"
+
+

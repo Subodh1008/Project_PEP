@@ -1,0 +1,27 @@
+---
+-  name: Azure CLI to create and configure Internal load balancer for SQL AlwaysOnAvailability
+   hosts: localhost
+   gather_facts: false
+   tasks:
+   - name: Create and Configure Azure Internal Load Balancer
+     block:
+     - name: Create load balancer
+       shell: " az network lb create --name sqlloadbalancer2
+                                     --resource-group sqllb 
+                                     --backend-pool-name backend2 
+                                     --frontend-ip-name frondendip2 
+                                     --private-ip-address 10.0.0.16 
+                                     --sku Standard 
+                                     --subnet default  
+                                     --vnet-name vnet1"
+       register: create_lb_status
+     - name: Check the status of Load Balancer creation
+       debug:
+         msg: "Azure internal load balancer created successfully"
+       when: create_lb_status.rc == 0
+
+     rescue:
+     - fail:
+        msg: "Error while creating Azure Load Balncer"
+
+

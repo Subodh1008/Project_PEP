@@ -1,0 +1,13 @@
+---
+- name: test
+  hosts: localhost
+  tasks:
+  - name: Check for the private IP address availability
+    shell: "az network vnet check-ip-address -g sqllb -n vnet1 --ip-address 10.0.0.4 "
+    register: cmd_output 
+    
+  - name: print1
+    debug:
+      msg: "IP address is in use, please check"
+    when: '"\"available\": false" in cmd_output.stdout'
+    

@@ -1,0 +1,3 @@
+backendips:
+  - { name: backendip1, ip: 10.0.0.4, addr: BEP_IP1 }
+  - { name: backendip2, ip: 10.0.0.5, addr: BEP_IP2 }

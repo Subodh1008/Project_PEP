@@ -1,0 +1,12 @@
+---
+# tasks file for load-balancer
+- name: Create Azure Internal load Balancer
+  include_tasks: 01_create_load_balancer.yml
+- name: Configure load balancer front end
+  include_tasks: 02_create_lb_frontend.yml
+- name: Create health probe for load balancer
+  include_tasks: 03_create_lb_probe.yml
+- name: Create health rule for load balancer
+  include_tasks: 04_create_lb_rule.yml
+- name: Configure load balancer backend pool
+  include_tasks: 05_create_lb_backendpool.yml

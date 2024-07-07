@@ -1,0 +1,15 @@
+---
+- name: Check the load balancer created
+  block:
+  - name: Fetch load balancer name
+    shell: "az network lb list --resource-group {{rg_name}} --query \"[?name=='{{ lb_name }}'] | length(@)\""
+    register: check_lb_created
+
+  - name: Check if load balancer created
+    debug:
+      msg: "Load balancer  {{ lb_name }} created successfully"
+    when: check_lb_exist.stdout >= "0"
+
+  rescue:
+  - fail:
+     msg: "Error while fetching the load balancer details"

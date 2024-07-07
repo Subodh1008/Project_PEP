@@ -1,0 +1,11 @@
+---
+- name: test
+  hosts: localhost
+  tasks:
+  - name: test
+    shell: "az network lb frontend-ip show --lb-name sqllb1 --name frontend --resource-group sqllb"
+    register: chk_frontend
+
+  - name: print
+    debug:
+      msg: "{{ chk_frontend.stdout_lines[9][name] }}"

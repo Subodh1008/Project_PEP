@@ -1,0 +1,21 @@
+---
+- name: Check the Resource Group  name exist
+  block:
+  - name: Get Resource Group name
+    shell: "if {{ fetch_rg_info }} >> /dev/null; then echo 'Exist'; else echo 'Not-Exist'; fi;"
+    register: get_rg_name
+    changed_when: false
+
+  - name: Print Resource Group exist message
+    debug:
+      msg: "The Resource Group : {{ rg_name }} exist"
+    when: "'Exist' == get_rg_name.stdout"
+
+  - name: Print Resource Group not exist message
+    fail:
+     msg: "The Resource Group : {{ rg_name }} does not exist"
+    when: "'Not-Exist' == get_rg_name.stdout"
+
+  rescue:
+  - fail:
+     msg: "Error while executing the Azure CLI command"

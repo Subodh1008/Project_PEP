@@ -1,0 +1,20 @@
+---
+- name: Appgw health
+  hosts: localhost
+  tasks:
+  - name: get access token
+    shell: "az account get-access-token --query accessToken"
+    register: at_info
+
+  - name: Print Token
+    debug:
+      msg: "{{ at_info.stdout }}"
+
+  - name: Check URI
+    uri:
+      url: https://management.azure.com/subscriptions/15be1093-b440-4bf8-ab01-31908768f05e/resourceGroups/appgw-rg/providers/Microsoft.Network/applicationGateways/appgw-app/backendhealth?api-version=2023-11-01
+      headers:
+        authorization: " Bearer {{ at_info.stdout }}"  
+      
+      return_content: true
+    register: info 

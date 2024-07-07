@@ -1,0 +1,4 @@
+---
+# tasks file for post-checks
+- name: Check if load balancer created
+  include_tasks: 01_postcheck_lb_created.yml

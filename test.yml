@@ -1,0 +1,13 @@
+---
+- name: test
+  hosts: localhost
+  tasks:
+  - name: print
+    shell: "echo {{ item.src }} {{ item.dest }} "
+    register: output
+    loop: "{{ mydict }}"
+
+  - name: print1
+    debug:
+      msg: "{{ output.results[0].rc }} {{ output.results[1].rc }}"
+    when: output.results[0].rc == 0 and output.results[1].rc == 0

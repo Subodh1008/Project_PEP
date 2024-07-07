@@ -1,0 +1,16 @@
+---
+- name: test
+  hosts: localhost
+  vars:
+  - regexp: 'value=\"([^"]+)'
+  vars_files:
+  - vars/lb_config_params.yml
+  tasks:
+  - name: get details
+    shell: "az network vnet check-ip-address -g sqllb -n vnet1 --ip-address 10.0.0.5"
+    register: res
+
+  - name: Prijt
+    debug:
+      msg: "{{ item }} {{ res.stdout[item] }}"
+    loop: "{{ res.stdout.keys()|list }}"

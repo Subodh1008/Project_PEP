@@ -1,0 +1,21 @@
+---
+- name: Check the VNet name exist
+  block:
+  - name: Get the Virtual Network name
+    shell: "if {{ fetch_vnet_info }} >> /dev/null; then echo 'Exist'; else echo 'Not-Exist'; fi;"
+    register: get_vnet_name
+    when: "'Exist' == get_rg_name.stdout"
+
+  - name: Print VNet exist message
+    debug:
+      msg: "The Virtual Network : {{ vnet_name }} found in Resource group: {{ rg_name }}"
+    when: "'Exist' == get_vnet_name.stdout"
+
+  - name: Print VNet not exist message
+    fail:
+     msg: "The Virual Network : {{ vnet_name }} not found"
+    when: "'Not-Exist' == get_vnet_name.stdout"
+
+  rescue:
+  - fail:
+     msg: "Error occured while executing the Azure CLI command"

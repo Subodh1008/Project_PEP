@@ -1,0 +1,10 @@
+---
+- name: test
+  hosts: localhost
+  vars_files:
+     - vars/lb_vars.yml
+  tasks:
+  - name: Print
+    debug:
+      msg: "{{ item.ip }} {{item.name}} {{item.addr}}"
+    loop: "{{ backendips }}"

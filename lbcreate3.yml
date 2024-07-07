@@ -1,0 +1,124 @@
+---
+-  name: Azure CLI to create and configure Internal load balancer for SQL AlwaysOnAvailability
+   hosts: localhost
+   gather_facts: false
+   tasks:
+   - name: Create and Configure Azure Internal Load Balancer
+     block:
+     - name: Create load balancer
+       shell: " az network lb create --name sqlloadbalancer2
+                                     --resource-group sqllb 
+                                     --backend-pool-name backend2 
+                                     --frontend-ip-name deletelater 
+                                     --sku Standard 
+                                     --subnet default  
+                                     --vnet-name vnet1"
+       register: create_lb_status
+     - name: Check the status of Load Balancer creation
+       debug:
+         msg: "Azure internal load balancer created successfully"
+       when: create_lb_status.rc == 0
+
+     rescue:
+     - fail:
+        msg: "Error while creating Azure Load Balncer"
+
+   - name: Create and Configure frontend IP
+     block:
+     - name: Create frontend IP
+       shell: "az network lb frontend-ip create --lb-name sqlloadbalancer2
+                                                --resource-group sqllb
+                                                --name frontend2
+                                                --private-ip-address 10.0.0.16
+                                                --zone 1 2 3
+                                                --vnet-name vnet1
+                                                --subnet default"
+       register: create_fip_status
+
+     - name: Check the status of Frontend ip creation
+       debug:
+         msg: "Front End IP creation and configuration completed successfully"
+       when: create_fip_status.rc == 0
+
+     - name: delete the deafult frontend IP created
+       shell: "az network lb frontend-ip delete --lb-name sqlloadbalancer2
+                                                --resource-group sqllb
+                                                --name deletelater"
+       register: delete_default_fip_status
+
+     - name: Check the status of default frontemd ip deletion
+       debug:
+         msg: "Default frontend IP deleted successfully"
+       when: delete_default_fip_status.rc == 0
+
+     rescue:
+      - fail:
+         msg: "Error while creating and configuring Frontend IP"
+
+
+   - name: Create and Configure Health Probe for Load Balancer
+     block:
+     - name: Create health probe
+       shell: "az network lb probe create --lb-name sqlloadbalancer2
+                                          --name healthprobe2
+                                          --port 80
+                                          --protocol Tcp
+                                          --resource-group sqllb
+                                          --interval 5"
+       register: create_hp_status
+     - name: Check the status of Health Probe creation
+       debug:
+         msg: "Health probe created successfully"
+       when: create_hp_status.rc == 0
+
+     rescue:
+     - fail:
+        msg: "Error while creating health probe for load balancer"
+
+   - name: Create and configure load balancer rule
+     block:
+     - name: Create load balancer rule
+       shell: "az network lb rule create --resource-group sqllb
+                                         --lb-name sqlloadbalancer2
+                                         --name lbrule2
+                                         --frontend-ip frontend2
+                                         --backend-pool-name backend2
+                                         --protocol Tcp
+                                         --frontend-port 80
+                                         --backend-port 80
+                                         --probe healthprobe2
+                                         --load-distribution SourceIPProtocol
+                                         --enable-tcp-reset no
+                                         --enable-floating-ip yes"
+       register: create_lbr_status
+     - name: Check the status of load balancer rule creation
+       debug:
+         msg: "Load balancer rule created successfully"
+       when: create_lbr_status.rc == 0
+
+     rescue:
+     - fail:
+        msg: "Error while creating load balancer rule"
+
+
+   - name: Configure backend pool
+     block:
+     - name: Add IP's to backend address pool
+       shell: "az network lb address-pool address add --resource-group sqllb
+                                                      --lb-name sqlloadbalancer2
+                                                      --pool-name backend2
+                                                      --name {{ item.backendAddr }}
+                                                      --vnet vnet1
+                                                      --ip-address {{ item.IP }}"
+       register: create_bep_status
+       with_items:
+         - { backendAddr : "MyAddress1", IP : "10.0.0.4" }
+         - { backendAddr : "MyAddress2", IP : "10.0.0.5" }
+     - name: Check the status of backend pool
+       debug:
+         msg: "backend pool created and added IP's to them successfully"
+       when: create_bep_status.results[0].rc == 0 and create_bep_status.results[1].rc == 0
+
+     rescue:
+     - fail:
+        msg: "Error while configuring the backend pool"

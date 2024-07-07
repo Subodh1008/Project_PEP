@@ -1,0 +1,21 @@
+---
+- name: Check Subnet name exist
+  block:
+  - name: Get Subnet name
+    shell: "if {{ fetch_subnet_info }} >> /dev/null; then echo 'Exist'; else echo 'Not-Exist'; fi;"
+    register: get_subnet_name
+    when: "'Exist' == get_vnet_name.stdout and 'Exist' == get_rg_name.stdout"
+
+  - name: Print Subnet exist message
+    debug:
+      msg: "The Subnet: {{ subnet_name }} found in Resource group: {{ rg_name }} and VNet: {{ vnet_name }}"
+    when: "'Exist' == get_subnet_name.stdout"
+
+  - name: Print Subnet not exist message
+    fail:
+     msg: "The Subnet: {{ subnet_name }} not found"
+    when: "'Not-Exist' == get_subnet_name.stdout"
+
+  rescue:
+  - fail:
+     msg: "Error occured while executing the Azure CLI command"
