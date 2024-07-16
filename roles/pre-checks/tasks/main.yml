@@ -1,12 +1,12 @@
 ---
 # tasks file for pre-checks
-- name: Load File -> Azure CLI Query File
+- name: load playbook - construct CLI commands
   include_tasks: 01_construct_queries.yml
-- name: Load File -> Check Resource Group
+- name: load playbook - check resource group 
   include_tasks: 02_check_rg_exist.yml
-- name: Load File -> Check Virtual Netowork
+- name: load playbook - check virtual network
   include_tasks: 03_check_vnet_exist.yml
-- name: Load File -> Check Subnet
+- name: load playbook - check subnet
   include_tasks: 04_check_subnet_exist.yml
-- name: Load File -> Check Load Balancer
+- name: load playbook - check load Balancer
   include_tasks: 05_check_lb_name_exist.yml

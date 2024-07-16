@@ -12,13 +12,13 @@
     register: create_bep_status
     with_items: "{{ backendips }}"
 
-  - name: Print configure backend pool message
+  - name: Check if backendpool configured
     debug:
       msg: "load balancer backend pool configured successfully"
     when: create_bep_status.results[0].rc == 0 and create_bep_status.results[1].rc == 0
   
   rescue:
   - fail: 
-     msg: "Error occured while executing Azure CLI command"
+     msg: "Error while executing configure backend pool Azure CLI command"
 
 

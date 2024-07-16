@@ -1,7 +1,7 @@
 ---
-- name: Create and Configure load balancer rule
+- name: Create load balancer rule
   block:
-  - name: Create load balancer rule
+  - name: Create and configure load balancer rule
     shell: "az network lb rule create 
             --resource-group {{ rg_name }}
             --lb-name {{ lb_name }}
@@ -17,15 +17,10 @@
             --enable-floating-ip {{ floating_ip }}"
     register: create_lbr_status
 
-  - name: Print load balancer rule created message
+  - name: Check if load balancer rule created
     debug:
-      msg: "Load balancer rule created successfully"
-    when: create_lbr_status.rc == 0
-
-  - name: Print load balancer rule not created message
-    debug:
-      msg: "Load balancer rule creation was unsuccessful"
-    when: create_lbr_status.rc != 0
+      msg: "{% if create_lbr_status.rc == 0 %} Load balancer rule created successfully \
+            {% else %} Load balancer rule creation was unsuccessful {% endif %}"
 
   rescue:
   - fail: 

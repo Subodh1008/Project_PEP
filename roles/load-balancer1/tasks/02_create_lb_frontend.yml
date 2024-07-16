@@ -1,7 +1,7 @@
 ---
 - name: Create and Configure Frontend IP
   block:
-  - name: Create and Configure frontend IP
+  - name: Create and Configure load balancer frontend IP
     shell: "az network lb frontend-ip create --lb-name {{ lb_name }}
             --resource-group {{ rg_name }}
             --name {{ frontend_name }}
@@ -11,35 +11,26 @@
             --subnet {{ subnet_name }}"
     register: create_fip_status
  
-  - name: Print Frontend IP created message
+  - name: Check if load balancer frontend IP created
     debug:
-      msg: "Azure Internal Load Balncer Front End IP creation and configuration completed successfully"
-    when: create_fip_status.rc == 0
-
-  - name: Print Frontend IP not created message
-    debug:
-      msg: "Azure Internal Load Balncer Front End IP creation and configuration was unsuccesful"
-    when: create_fip_status.rc != 0
-
-  - name: Delete the deafult frontend IP created
-    shell: "az network lb frontend-ip delete --lb-name {{ lb_name }}
+      msg: "{% if create_fip_status.rc == 0 %} Load balancer frontend IP creation and configuration completed successfully \ 
+            {% else %} Load balncer frontend IP creation and configuration was unsuccesful {% endif %}"
+ 
+  - name: Delete the deafult frontend IP
+    shell: "az network lb frontend-ip delete 
+            --lb-name {{ lb_name }}
             --resource-group {{ rg_name }}
             --name {{ default_fip_name }}"
     register: delete_default_fip_status
     when: "'Not-Exist' in get_lb_name.stdout"
  
-  - name: Print default Frontend IP deleted message
+  - name: Check default frontend IP deleted or not
     debug:
-      msg: "Azure load balancer default frontend IP deleted successfully"
-    when: delete_default_fip_status.changed
-
-  - name: Print default Frontend IP not deleted message
-    debug:
-      msg: "Azure load balancer default frontend IP was not found because its existing frontend"
-    when: delete_default_fip_status.skipped
+      msg: "{% if delete_default_fip_status.changed %} Load balancer default frontend IP deleted successfully \
+            {% else %} Load balancer default frontend IP was not found because its existing frontend {% endif %}"
 
   rescue:
   - fail: 
-     msg: "Error occured while executing Azure CLI command"
+     msg: "Error while executing create frontend IP Azure CLI command"
 
 

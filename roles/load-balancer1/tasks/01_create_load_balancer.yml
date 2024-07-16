@@ -1,7 +1,7 @@
 ---
-- name: Create azure internal load balancer
+- name: Create load balancer
   block:
-  - name: Create Azure Internal load balancer
+  - name: Create and configure Azure Internal load balancer
     shell: "az network lb create --name {{ lb_name }}
        --resource-group {{ rg_name }}
        --backend-pool-name {{ bep_name }}
@@ -11,13 +11,13 @@
     register: create_lb_status
     when: "'Not-Exist' in  get_lb_name.stdout"
 
-  - name: Print load balacner created message
+  - name: Check if load balancer created or not
     debug:
-      msg: "Azure load balancer: {{ lb_name }}  created successfully or its already exist"
-    when: create_lb_status.changed or create_lb_status.skipped
+      msg: "{% if create_lb_status.changed %} Load balancer {{ lb_name }} created successfully \
+            {% else %} Load balancer {{ lb_name }} is already exist so no action was taken {% endif %}"
 
   rescue:
   - fail: 
-     msg: "Error occured while executing Azure CLI command"
+     msg: "Error while executing create load balancer Azure CLI command"
 
 

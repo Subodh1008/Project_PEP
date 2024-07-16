@@ -1,21 +1,22 @@
 ---
-- name: Check the Resource Group  name exist
+- name: Check the Resource Group
   block:
-  - name: Get Resource Group name
+  - name: Check if resource group exist
     shell: "if {{ fetch_rg_info }} >> /dev/null; then echo 'Exist'; else echo 'Not-Exist'; fi;"
     register: get_rg_name
     changed_when: false
 
-  - name: Print Resource Group exist message
+  - name: Print message if resource group exist
     debug:
-      msg: "The Resource Group : {{ rg_name }} exist"
-    when: "'Exist' == get_rg_name.stdout"
-
-  - name: Print Resource Group not exist message
+      msg: The Resource Group {{ rg_name }} found
+    when: "'Exist' == get_rg_name.stdout" 
+  
+ 
+  - name: Fail if resource group not exist
     fail:
-     msg: "The Resource Group : {{ rg_name }} does not exist"
-    when: "'Not-Exist' == get_rg_name.stdout"
+     msg: "The resource group : {{ rg_name }} not found,so exiting the playbook"
+    when: "'Not-Exist' == get_rg_name.stdout" 
 
   rescue:
   - fail:
-     msg: "Error while executing the Azure CLI command"
+     msg: "Error while executing check resource group  Azure CLI command"

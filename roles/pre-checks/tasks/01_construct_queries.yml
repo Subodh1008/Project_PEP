@@ -1,7 +1,7 @@
 ---
 - name: Construct Queries
   block:
-  - name: Construct Azure CLI commands to fetch resource deatils 
+  - name: CLI to fetch resource information 
     set_fact:
       fetch_lb_info: "az network lb show -g {{ rg_name}} -n {{ lb_name }}  --query name"
       fetch_vnet_info: "az network vnet show -g {{ rg_name }} -n {{ vnet_name }} --query name"
