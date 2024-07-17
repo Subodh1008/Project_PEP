@@ -3,7 +3,6 @@
   hosts: localhost
   gather_facts: false
   vars_files:
-    - roles/load-balancer1/vars/lb_config_params.yml
+    - roles/load-balancer2/vars/lb_config_params1.yml
   roles:
-    - pre-checks
-    - load-balancer1 
+    - pre-checks1
