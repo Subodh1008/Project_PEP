@@ -1,0 +1,10 @@
+---
+- name: Construct Queries
+  block:
+  - name: CLI to fetch resource information 
+    set_fact: 
+      fetch_lb_info: "az network lb show -g {{ item.rg_name}} -n {{ item.lb_name }}  --query name"
+      fetch_vnet_info: "az network vnet show -g {{ item.rg_name }} -n {{ item.vnet_name }} --query name"
+      fetch_subnet_info: "az network vnet subnet show -g {{ item.rg_name }} -n {{ item.subnet_name }} --vnet-name {{ item.vnet_name }} --query name"
+      fetch_rg_info: "az group show --name {{ item.rg_name }} --query name"
+    loop: "{{ load_balancers }}"

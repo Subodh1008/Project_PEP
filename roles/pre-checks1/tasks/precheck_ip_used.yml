@@ -1,0 +1,15 @@
+---
+- name: Check the load balancer name exist
+  block:
+  - name: Fetch the IP ddress
+    shell: "az network vnet check-ip-address -g {{ rg_name }} -n {{ vnet_name }} --ip-address {{ private_ip_addr }} "
+    register: is_ip_used
+    
+  - name: Check if the IP address is in use
+    debug:
+      msg: "IP address: {{ private_ip_addr }} is in use, please check"
+    when: '"\"available\": false" in is_ip_used.stdout'
+
+  rescue:
+  - fail:
+     msg: "Error while fetching IP address details"
