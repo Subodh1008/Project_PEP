@@ -1,20 +1,35 @@
 ---
 - name: Create load balancer
   block:
+  - name: Print get_lb_name
+    debug:
+      msg: "{{ get_lb_name.results[cnt].stdout }}"
+    loop: "{{ load_balancers }}"
+    loop_control:
+      index_var: cnt
+      label: "{{ get_lb_name.results[cnt].stdout }}"
+
   - name: Create and configure Azure Internal load balancer
-    shell: "az network lb create --name {{ lb_name }}
-       --resource-group {{ rg_name }}
-       --backend-pool-name {{ bep_name }}
-       --sku {{ sku_value }}
-       --subnet {{ subnet_name }}  
-       --vnet-name {{ vnet_name }}"
+    shell: "az network lb create --name {{ item.lb_name }}
+       --resource-group {{ item.rg_name }}
+       --backend-pool-name {{ item.bep_name }}
+       --sku {{ item.sku_value }}
+       --subnet {{ item.subnet_name }}  
+       --vnet-name {{ item.vnet_name }}"
+    when: "'Not-Exist' == get_lb_name.results[cnt].stdout"
+    loop: "{{ load_balancers }}"
+    loop_control:
+      index_var: cnt
+      label: "Load balancer name: {{ get_lb_name.results[cnt].item.lb_name }}"
     register: create_lb_status
-    when: "'Not-Exist' in  get_lb_name.stdout"
 
   - name: Check if load balancer created or not
     debug:
-      msg: "{% if create_lb_status.changed %} Load balancer {{ lb_name }} created successfully \
-            {% else %} Load balancer {{ lb_name }} is already exist so no action was taken {% endif %}"
+      msg: "{% if item.changed %} Load balancer {{ item.item.lb_name }} created successfully \
+            {% else %} Load balancer {{ item.item.lb_name }} is already exist so no action was taken {% endif %}"
+    loop: "{{ create_lb_status.results }}"
+    loop_control:
+      label: "{{ item.item.lb_name }}" 
 
   rescue:
   - fail: 

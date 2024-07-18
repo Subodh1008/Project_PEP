@@ -1,0 +1,13 @@
+---
+- name: test
+  hosts: localhost
+  vars_files:
+    - roles/load-balancer2/vars/lb_config_params2.yml
+  tasks:
+  - name: Print
+    debug:
+      msg: "{{ item.0.rg_name }} {{ item.1.ip }} {{ item.1.addr }}"
+    loop: "{{ query('subelements',load_balancers,'backendips') }}"
+    
+
+   

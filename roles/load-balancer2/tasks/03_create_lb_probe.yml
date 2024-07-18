@@ -3,18 +3,26 @@
   block:
   - name: Create and configure health probe for load balancer
     shell: "az network lb probe create 
-            --lb-name {{ lb_name }}
-            --name {{ probe_name }}
-            --port {{ probe_port }}
-            --protocol {{ protocol }}
-            --resource-group {{ rg_name }}
-            --interval {{ interval_value }}"
+            --lb-name {{ item.lb_name }}
+            --name {{ item.probe_name }}
+            --port {{ item.probe_port }}
+            --protocol {{ item.protocol }}
+            --resource-group {{ item.rg_name }}
+            --interval {{ item.interval_value }}"
     register: create_hp_status
+    loop: "{{ load_balancers }}"
+    loop_control:
+      label: "health probe name: {{ get_lb_name.results[cnt].item.probe_name }}"
+      index_var: cnt
   
   - name: Check if health probe created
     debug:
-      msg: "{% if create_hp_status.rc == 0 %} health probe created successfully \
+      msg: "{% if item.rc == 0 %} health probe created successfully \
             {% else %} health probe creation was unsuccessful {% endif %}" 
+    loop: "{{ create_hp_status.results }}"
+    loop_control:
+      label: "Probe name: {{ create_hp_status.results[cnt].item.probe_name }}"
+      index_var: cnt
 
   rescue:
   - fail: 

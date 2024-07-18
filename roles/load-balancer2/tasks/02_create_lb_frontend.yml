@@ -2,35 +2,40 @@
 - name: Create and Configure Frontend IP
   block:
   - name: Create and Configure load balancer frontend IP
-    shell: "az network lb frontend-ip create --lb-name {{ lb_name }}
-            --resource-group {{ rg_name }}
-            --name {{ frontend_name }}
-            --private-ip-address {{ private_ip_addr }}
-            --zone {{ availability_zone }}
-            --vnet-name {{ vnet_name }}
-            --subnet {{ subnet_name }}"
+    shell: "az network lb frontend-ip create --lb-name {{ item.lb_name }}
+            --resource-group {{ item.rg_name }}
+            --name {{ item.frontend_name }}
+            --private-ip-address {{ item.private_ip_addr }}
+            --zone {{ item.availability_zone }}
+            --vnet-name {{ item.vnet_name }}
+            --subnet {{ item.subnet_name }}"
     register: create_fip_status
- 
-  - name: Check if load balancer frontend IP created
-    debug:
-      msg: "{% if create_fip_status.rc == 0 %} Load balancer frontend IP creation and configuration completed successfully \ 
-            {% else %} Load balncer frontend IP creation and configuration was unsuccesful {% endif %}"
- 
+    loop: "{{ load_balancers }}"
+    loop_control:
+      label: "Frontend Name: {{ get_lb_name.results[cnt].item.frontend_name }}"
+      index_var: cnt
+
   - name: Delete the deafult frontend IP
-    shell: "az network lb frontend-ip delete 
-            --lb-name {{ lb_name }}
-            --resource-group {{ rg_name }}
-            --name {{ default_fip_name }}"
+    shell: "az network lb frontend-ip delete
+            --lb-name {{ item.lb_name }}
+            --resource-group {{ item.rg_name }}
+            --name {{ item.default_fip_name }}"
     register: delete_default_fip_status
-    when: "'Not-Exist' in get_lb_name.stdout"
- 
+    when: "'Not-Exist' in get_lb_name.results[cnt].stdout"
+    loop: "{{ load_balancers }}"
+    loop_control:
+      label: "Deafult frontend name: {{ create_fip_status.results[cnt].item.default_fip_name }}"
+      index_var: cnt
+
   - name: Check default frontend IP deleted or not
     debug:
-      msg: "{% if delete_default_fip_status.changed %} Load balancer default frontend IP deleted successfully \
+      msg: "{% if item.changed %} Load balancer default frontend IP deleted successfully \
             {% else %} Load balancer default frontend IP was not found because its existing frontend {% endif %}"
+    loop: "{{ delete_default_fip_status.results }}"
+    loop_control:
+      label: "Frontend default name: {{ delete_default_fip_status.results[cnt].item.default_fip_name }} "
+      index_var: cnt
 
   rescue:
-  - fail: 
+  - fail:
      msg: "Error while executing create frontend IP Azure CLI command"
-
-
